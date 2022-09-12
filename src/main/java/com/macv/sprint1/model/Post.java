@@ -1,12 +1,12 @@
 package com.macv.sprint1.model;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class Post {
 
     private int id;

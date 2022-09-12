@@ -8,6 +8,7 @@ import com.macv.sprint1.repository.FollowsRepository;
 import com.macv.sprint1.repository.PersonRepository;
 import com.macv.sprint1.repository.SellerRepository;
 import com.macv.sprint1.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -22,12 +24,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final SellerRepository sellerRepository;
     private final FollowsRepository followsRepository;
+    private final ModelMapper mapper;
 
     @Autowired
     public UserService(UserRepository userRepository, SellerRepository sellerRepository, FollowsRepository followsRepository) {
         this.userRepository = userRepository;
         this.sellerRepository = sellerRepository;
         this.followsRepository = followsRepository;
+        mapper= new ModelMapper();
     }
 
     public MessageResponseDto follow(int followerId, int followedId) {
@@ -54,7 +58,7 @@ public class UserService {
         var seller = sellerRepository.getById(followedId);
         if (seller.isEmpty()) throw new SellerNotFoundException(followedId);
         var followersCount = followsRepository.getFollowersCountFor(followedId);
-        return new FollowersCountResponseDto(followedId, seller.get().getName(), followersCount);
+        return new FollowersCountResponseDto(followedId, seller.get().getUserName(), followersCount);
     }
 
     public FollowersListResponseDto getFollowersListFor(int userId, Optional<String> order) {
@@ -62,7 +66,7 @@ public class UserService {
         if (seller.isEmpty()) throw new SellerNotFoundException(userId);
         var followerIds = followsRepository.getFollowersIdsFollowing(userId);
         var followers = getUserDtosFrom(followerIds, userRepository, order);
-        return new FollowersListResponseDto(userId, seller.get().getName(), followers);
+        return new FollowersListResponseDto(userId, seller.get().getUserName(), followers);
     }
 
     public FollowingListResponseDto getFollowingListFor(int userId, Optional<String> order) {
@@ -70,14 +74,18 @@ public class UserService {
         if (user.isEmpty()) throw new UserNotFoundException(userId);
         var followedIds = followsRepository.getFollowedIdsForFollower(userId);
         var followings = getUserDtosFrom(followedIds, sellerRepository, order);
-        return new FollowingListResponseDto(userId, user.get().getName(), followings);
+        return new FollowingListResponseDto(userId, user.get().getUserName(), followings);
+    }
+
+    public List<UserResponseDto> getAllUsers(){
+        return userRepository.getAll().stream().map(s-> mapper.map(s, UserResponseDto.class)).collect(Collectors.toList());
     }
 
     private <T extends Person> List<UserResponseDto> getUserDtosFrom(List<Integer> ids, PersonRepository<T> personRepository, Optional<String> order) {
         var userDtos = new ArrayList<UserResponseDto>();
         for (Integer followerId : ids) {
             var user = personRepository.getById(followerId);
-            user.ifPresent(value -> userDtos.add(new UserResponseDto(value)));
+            user.ifPresent(value -> userDtos.add(mapper.map(value, UserResponseDto.class)));
         }
         order.ifPresent(s -> sort(userDtos, s));
         return userDtos;

@@ -1,5 +1,7 @@
 package com.macv.sprint1.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ProductRequestDto {
 
-    private int product_id;
-    private String product_name;
+    private int productId;
+    private String productName;
     private String type;
     private String brand;
     private String color;

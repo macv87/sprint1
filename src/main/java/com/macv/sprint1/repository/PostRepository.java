@@ -14,11 +14,6 @@ public class PostRepository {
     private final List<Post> posts=new ArrayList<>();
     private int currentId=1;
 
-    public List<Post> getAllForUserId(int userId){
-        return posts.stream().filter(s-> s.getUserId()==userId).collect(Collectors.toList());
-    }
-
-
     public boolean add(Post post){
         post.setId(currentId++);
         posts.add(post);

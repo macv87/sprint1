@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -25,6 +26,11 @@ public class UserController {
         return "Hola mundo";
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDto>> getAll(){
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+    
     //US 0001
     @PostMapping("/users/{userId}/follow/{userIdToFollow}")
     public ResponseEntity<MessageResponseDto> follow(@PathVariable int userId, @PathVariable int userIdToFollow) {
